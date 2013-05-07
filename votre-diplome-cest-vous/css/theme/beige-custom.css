@@ -1,0 +1,14 @@
+@import url(beige.css);
+
+.reveal section img {
+  border: 0;
+}
+
+/** Specific slides **/
+.web-history-latest body {
+	background: #fff url(../../img/web-history-latest.jpg) no-repeat top center;
+}
+
+.web-history-latest.opaque .reveal {
+	background-color: rgba(255,255,255,0.6);
+}
