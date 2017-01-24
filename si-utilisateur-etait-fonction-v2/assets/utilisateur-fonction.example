@@ -1,0 +1,33 @@
+function User(/* ??? */) {
+  /* ??? */
+  return /* ??? */
+}
+
+function User(/* ??? */) {
+    /* ??? */
+    return DOMEvent
+}
+
+
+
+
+function User(/* ??? */) {
+    /* ??? */
+    return DOMEvent$;
+}
+
+function User(DOM$) {
+    /* ??? */
+    return DOMEvent$;
+}
+
+function User(DOM$) {
+    const DOMEvent$ = DOM$
+        .map(Écran)
+        .map(Yeux)
+        .mergeMap(Cerveau) // <-- Asynchrone
+        .map(Mains)
+        .map(SourisClavier);
+
+    return DOMEvent$;
+}
