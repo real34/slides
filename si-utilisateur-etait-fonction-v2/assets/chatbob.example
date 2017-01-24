@@ -1,0 +1,116 @@
+const CURRENT_USER = 'Pierre'
+const BOT_NAME = 'ChatBob'
+const MESSAGES_LIMIT = 4
+
+const messageForm = document.getElementById('newMessageForm')
+
+const sentMessage$ = Rx.Observable
+  .fromEvent(messageForm, 'submit')
+  .map((e) => {
+    e.preventDefault()
+    return e.target
+      .querySelector('[name="message"]')
+      .value
+  })
+  .map((content) => ({
+    emitter: CURRENT_USER,
+    content,
+    sentAt: new Date()
+  }))
+  .take(MESSAGES_LIMIT)
+  .share()
+
+const remindCommand$ = sentMessage$
+  .filter(({content}) => (
+    content.startsWith('/remind ')
+  ))
+  .map((msg) => {
+    const reminderRegex = /\/remind (.*) "(.*)" in (\d+)/i
+    if (!reminderRegex.test(msg.content)) {
+        throw new Error(`Invalid reminder!`)
+    }
+    const [, who, what, when] =
+      reminderRegex.exec(msg.content)
+
+    return {
+      who,
+      what,
+      when,
+      initialMessage: msg
+    }
+  })
+
+const reminderMessage$ = remindCommand$
+  .mergeMap((command) => Rx.Observable.merge(
+    Rx.Observable.of(
+      `<em>
+        Understood!
+        I will remind you to "${command.what}" in ${command.when} seconds
+      </em>`
+    ),
+    Rx.Observable
+      .of(
+        `<strong>
+          Reminder:
+          you asked me to remind you to "${command.what}"
+        </strong>`
+      )
+      .delay(command.when * 1000)
+  ))
+  .catch((error) => Rx.Observable.of(
+    `<strong>ERROR</strong>
+     <span style="color:red">
+      ${error.message}
+     </span>`
+  ))
+  .map((content) => ({
+    emitter: BOT_NAME,
+    content,
+    sentAt: new Date()
+  }))
+
+const message$ = Rx.Observable.merge(
+  sentMessage$,
+  reminderMessage$
+)
+
+message$
+  .map(({emitter, content, sentAt}) => htmlToElement(
+    `<div class="
+      message
+      ${emitter === CURRENT_USER ? ' message--mine' : ''}
+    ">
+      <p class="message__emitter">
+        ${emitter}
+      </p>
+      <p class="message__content">
+        ${content}
+      </p>
+      <p class="message__timestamp">
+        ${sentAt.toLocaleTimeString()}
+      </p>
+    </div>`
+  ))
+  .subscribe((messageElement) => {
+    document
+      .getElementById('messages')
+      .appendChild(messageElement)
+  })
+
+sentMessage$.subscribe(
+  () => messageForm.reset(),
+  (e) => console.error('An error occured', e),
+  () => {
+    messageForm.innerHTML = `<p>
+      You spent all your credits!
+      No more than ${MESSAGES_LIMIT} messages!
+    </p>`
+  }
+)
+
+// @see http://stackoverflow.com/a/35385518
+function htmlToElement(html) {
+    var template = document.createElement('template');
+    template.innerHTML = html;
+    return template.content.firstChild;
+}

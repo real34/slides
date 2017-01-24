@@ -1,0 +1,2 @@
+start:
+	@docker run -ti --rm --name toulousejs -e NPM_CONFIG_PROGRESS=false -v `pwd`:/project -v ~/.npm:/root/.npm -w /project -p 3000 -e VIRTUAL_HOST=toulousejs.test -e VIRTUAL_PORT=3000 node:5.1.0 npm start

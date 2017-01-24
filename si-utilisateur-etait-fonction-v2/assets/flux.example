@@ -1,0 +1,17 @@
+const a = 4
+const b = 6
+const c = 3
+
+const total = sum(a, b, c)
+
+function sum(...values) {
+  return values.reduce(
+    (acc, value) => acc + value,
+    0
+  )
+}
+
+const total$ = Observable.combineLatest(
+  a$, b$, c$,
+  (a, b, c) => sum(a, b, c)
+)
